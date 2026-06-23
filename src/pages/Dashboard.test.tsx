@@ -46,4 +46,22 @@ describe('Dashboard', () => {
     renderDash()
     expect(screen.getByText('Rs 30')).toBeInTheDocument() // today profit
   })
+
+  it('shows Total Worth + today kharcha and links to kharcha + udhari', async () => {
+    const base = useAppStore.getState().data!
+    useAppStore.setState({
+      data: {
+        ...base,
+        drawer: { 100: 10 },
+        expenses: [{ id: 'e1', category: 'Bijli', amount: 200_00, payment: 'cash', walletId: null, createdAt: new Date().toISOString() }],
+        persons: [{ id: 'p1', name: 'Ali' }],
+        udharEntries: [{ id: 'u1', personId: 'p1', type: 'given', amount: 500_00, payment: 'cash', walletId: null, createdAt: new Date().toISOString() }],
+      },
+    })
+    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    expect(screen.getByText('Total Worth')).toBeInTheDocument()
+    expect(screen.getByText('Rs 200')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /kharcha/i })).toHaveAttribute('href', '/kharcha')
+    expect(screen.getByRole('link', { name: /udhar/i })).toHaveAttribute('href', '/udhari')
+  })
 })

@@ -26,6 +26,7 @@ export default function Settings() {
   const [shopName, setShopName] = useState(data?.settings.shopName ?? '')
   const [pin, setPin] = useState(data?.settings.pin ?? '')
   const [newWallet, setNewWallet] = useState('')
+  const [newCategory, setNewCategory] = useState('')
 
   if (!data) return null
 
@@ -99,6 +100,38 @@ export default function Settings() {
             className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white"
           >
             Add wallet
+          </button>
+        </div>
+      </section>
+
+      <section className="space-y-2 rounded-xl border bg-white p-4">
+        <h2 className="font-semibold">Expense Categories</h2>
+        <ul className="space-y-1">
+          {data.settings.expenseCategories.map((c) => (
+            <li key={c} className="flex items-center justify-between">
+              <span>{c}</span>
+              <button
+                onClick={() => updateSettings({ expenseCategories: safeData.settings.expenseCategories.filter((x) => x !== c) })}
+                className="text-sm text-red-600"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+        <label htmlFor="newCategory" className="block text-sm">New category</label>
+        <div className="flex gap-2">
+          <input id="newCategory" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="flex-1 rounded-lg border px-3 py-2" />
+          <button
+            onClick={() => {
+              const name = newCategory.trim()
+              if (!name || safeData.settings.expenseCategories.includes(name)) return
+              updateSettings({ expenseCategories: [...safeData.settings.expenseCategories, name] })
+              setNewCategory('')
+            }}
+            className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white"
+          >
+            Add category
           </button>
         </div>
       </section>
