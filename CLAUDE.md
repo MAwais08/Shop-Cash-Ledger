@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A cash-accounting web app for a Pakistani PCO / Easyload / mobile-packages shop. The headline requirement: track **every rupee** in and out — "1 rupya bhi shop se jaye to pata lage, aur aaye to bhi pata lage." Physical cash is tracked **note-by-note** (per denomination, big vs small), alongside digital wallets (Easypaisa/JazzCash/Bank). Single shared PIN login. Built mobile-first (used on phone + PC).
 
-Status: Phase 1 (foundation) and Phase 2A (transactions + cash ledger) are complete and on `main`. Runs entirely on `localStorage`; Phase 2B will add a Supabase backend behind the existing `Repository` seam with no domain/UI changes.
+Status: Phases 1, 2A, and 2B are complete on `main`. Backed by **Supabase** (Postgres JSONB, single `app_state` row). Phase 3 (Kharcha + Udhari) is next.
 
 ## Commands
 
@@ -51,14 +51,22 @@ Strict one-way dependency flow: **domain ← data ← store ← UI**. Lower laye
   - `transaction.ts` — `Transaction`, `CashMovement`, `TransactionInput`, `applyTransaction`, `deleteTransaction` (full reversal), `mergeNoteDelta`. `walletDelta` is a **signed** delta added to the wallet balance: money leaving a wallet is **negative**, arriving is **positive**.
   - `summary.ts` — `summarize`, `todaysTransactions`/`isSameDay`, `searchTransactions`, `walletStats`
 
-- **`src/data/`** — persistence behind the `Repository` interface (`load(): Promise<AppData>`, `save(data): Promise<void>`). `AppData` is the single persisted blob (`settings`, `wallets`, `drawer`, `transactions`, `cashMovements`). Implementations: `InMemoryRepository` (tests) and `LocalStorageRepository` (runtime, key `pco_app_data`; backs up corrupt JSON to `pco_app_data_corrupt` and reseeds). `normalize.ts`'s `normalizeAppData` fills arrays missing from older persisted data (back-compat) and is called on load by both repositories. `seed.ts` provides defaults (PIN `1234`, the three wallets, default denominations).
+- **`src/data/`** — persistence behind the `Repository` interface (`load(): Promise<AppData>`, `save(data): Promise<void>`). `AppData` is the single persisted blob (`settings`, `wallets`, `drawer`, `transactions`, `cashMovements`). Implementations: `InMemoryRepository` (tests), `LocalStorageRepository` (legacy/offline), and `SupabaseRepository` (production — persists the whole blob as one JSONB row in the `app_state` table, seeds on first load, throws on network error). `normalize.ts`'s `normalizeAppData` fills arrays missing from older persisted data (back-compat). `seed.ts` provides defaults (PIN `1234`, the three wallets, default denominations).
 
 - **`src/store/appStore.ts`** — a single Zustand store (`useAppStore`) holding `repo`/`data`/`authed`. Actions (`addTransaction`, `deleteTransaction`, `updateSettings`, `upsertWallet`, `removeWallet`) follow one pattern: build the next `AppData` via a pure domain function → `await repo.save(next)` → `set({ data: next })`. Read-only derived values are exported **scalar** selectors (`selectTotalCash`, `selectBigTotal`, `selectSmallTotal`).
   - **Zustand v5 trap:** a selector returning a *fresh object/array* on each call causes "Maximum update depth exceeded" infinite re-renders. Do not write object-returning store selectors. Derive such values in the component with `useMemo` over the raw slice (see `Dashboard.tsx` and how today's summary is computed there).
 
-- **`src/pages/` + `src/components/`** — the UI. `App.tsx` gates on `data`/`authed` then routes (`/`, `/new`, `/transactions`, `/cash`, `/settings`) under `AppLayout`'s bottom nav. `main.tsx` is where the repository is injected (`init(new LocalStorageRepository())`) — **this is the single swap point** for the future `SupabaseRepository`.
+- **`src/pages/` + `src/components/`** — the UI. `App.tsx` gates on `data`/`authed` then routes (`/`, `/new`, `/transactions`, `/cash`, `/settings`) under `AppLayout`'s bottom nav. `main.tsx` is the single DI point — currently injects `SupabaseRepository` built from `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` env vars (see `.env.example`). Swapping the repository means changing only this file.
 
 Styling is Tailwind v3 with an emerald/slate palette.
+
+## Supabase
+
+Production database: Supabase project `beuuswivjvdsfaixvhzd` (ap-northeast-2). Schema is in `supabase/schema.sql` — apply once via the Supabase SQL Editor (no migration tooling yet). The `app_state` table holds one singleton row (`id = 1`, `data jsonb`). RLS is enabled with a permissive anon policy — the PIN gate is client-side.
+
+Local dev needs a `.env` file (copy `.env.example`, fill in real values). The build does not require `.env` — the missing-env guard is runtime-only.
+
+`SupabaseRepository` tests are fully offline (injected `fakeSupabase()` helper in `supabaseRepository.test.ts`) — no Supabase project needed to run the test suite.
 
 ## Conventions
 
