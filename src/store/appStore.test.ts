@@ -161,3 +161,41 @@ describe('appStore expenses', () => {
     expect(useAppStore.getState().data!.drawer[100]).toBe(10)
   })
 })
+
+describe('appStore udhari', () => {
+  it('addPerson appends a person and returns its id', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    const id = await useAppStore.getState().addPerson('Ali', '03001234567')
+    expect(id).toBeTruthy()
+    const p = useAppStore.getState().data!.persons.find((x) => x.id === id)!
+    expect(p.name).toBe('Ali')
+    expect((await repo.load()).persons).toHaveLength(1)
+  })
+
+  it('addUdhar (cash given) records an entry and reduces the drawer', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 1000: 5 } } })
+    const id = await useAppStore.getState().addPerson('Ali')
+    await useAppStore.getState().addUdhar({ personId: id, type: 'given', amount: 2000_00, payment: 'cash', walletId: null, notes: { 1000: 2 } })
+    const data = useAppStore.getState().data!
+    expect(data.udharEntries).toHaveLength(1)
+    expect(data.drawer[1000]).toBe(3)
+  })
+
+  it('deleteUdhar reverses the entry', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 1000: 5 } } })
+    const id = await useAppStore.getState().addPerson('Ali')
+    await useAppStore.getState().addUdhar({ personId: id, type: 'given', amount: 1000_00, payment: 'cash', walletId: null, notes: { 1000: 1 } })
+    const entryId = useAppStore.getState().data!.udharEntries[0].id
+    await useAppStore.getState().deleteUdhar(entryId)
+    expect(useAppStore.getState().data!.udharEntries).toHaveLength(0)
+    expect(useAppStore.getState().data!.drawer[1000]).toBe(5)
+  })
+})

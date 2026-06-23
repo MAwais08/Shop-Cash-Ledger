@@ -8,6 +8,8 @@ import { applyTransaction, deleteTransaction as deleteTxnDomain } from '../domai
 import type { TransactionInput } from '../domain/transaction'
 import { applyExpense, deleteExpense as deleteExpenseDomain } from '../domain/expense'
 import type { ExpenseInput } from '../domain/expense'
+import { applyUdhar, deleteUdhar as deleteUdharDomain } from '../domain/udhar'
+import type { UdharInput, Person } from '../domain/udhar'
 
 interface AppState {
   repo: Repository | null
@@ -23,6 +25,10 @@ interface AppState {
   deleteTransaction: (id: string) => Promise<void>
   addExpense: (input: Omit<ExpenseInput, 'id' | 'createdAt'>) => Promise<void>
   deleteExpense: (id: string) => Promise<void>
+  addPerson: (name: string, phone?: string) => Promise<string>
+  updatePerson: (id: string, patch: Partial<Pick<Person, 'name' | 'phone'>>) => Promise<void>
+  addUdhar: (input: Omit<UdharInput, 'id' | 'createdAt'>) => Promise<void>
+  deleteUdhar: (id: string) => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -107,6 +113,42 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { repo, data } = get()
     if (!repo || !data) return
     const next = deleteExpenseDomain(data, id)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async addPerson(name, phone) {
+    const { repo, data } = get()
+    if (!repo || !data) return ''
+    const person: Person = { id: crypto.randomUUID(), name, phone: phone || undefined }
+    const next: AppData = { ...data, persons: [...data.persons, person] }
+    await repo.save(next)
+    set({ data: next })
+    return person.id
+  },
+
+  async updatePerson(id, patch) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const persons = data.persons.map((p) => (p.id === id ? { ...p, ...patch } : p))
+    const next: AppData = { ...data, persons }
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async addUdhar(input) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const full: UdharInput = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
+    const next = applyUdhar(data, full)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async deleteUdhar(id) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const next = deleteUdharDomain(data, id)
     await repo.save(next)
     set({ data: next })
   },
