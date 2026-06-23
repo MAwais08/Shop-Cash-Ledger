@@ -10,6 +10,8 @@ import { applyExpense, deleteExpense as deleteExpenseDomain } from '../domain/ex
 import type { ExpenseInput } from '../domain/expense'
 import { applyUdhar, deleteUdhar as deleteUdharDomain } from '../domain/udhar'
 import type { UdharInput, Person } from '../domain/udhar'
+import { applyCount } from '../domain/count'
+import type { CountInput } from '../domain/count'
 
 interface AppState {
   repo: Repository | null
@@ -29,6 +31,7 @@ interface AppState {
   updatePerson: (id: string, patch: Partial<Pick<Person, 'name' | 'phone'>>) => Promise<void>
   addUdhar: (input: Omit<UdharInput, 'id' | 'createdAt'>) => Promise<void>
   deleteUdhar: (id: string) => Promise<void>
+  recordCount: (input: Omit<CountInput, 'id' | 'createdAt'>) => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -149,6 +152,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { repo, data } = get()
     if (!repo || !data) return
     const next = deleteUdharDomain(data, id)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async recordCount(input) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const full: CountInput = {
+      ...input,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    }
+    const next = applyCount(data, full)
     await repo.save(next)
     set({ data: next })
   },

@@ -166,6 +166,41 @@ describe('appStore expenses', () => {
   })
 })
 
+describe('appStore count', () => {
+  it('recordCount with a difference updates drawer + counts + a count movement; persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 1000: 5 } } }) // Rs 5000
+
+    await useAppStore.getState().recordCount({ countedNotes: { 1000: 4 }, note: 'short' }) // Rs 4000
+
+    const data = useAppStore.getState().data!
+    expect(data.counts).toHaveLength(1)
+    expect(data.counts[0].difference).toBe(-1000_00)
+    expect(data.drawer[1000]).toBe(4)
+    expect(data.cashMovements).toHaveLength(1)
+    expect(data.cashMovements[0].sourceType).toBe('count')
+    expect(data.cashMovements[0].delta).toBe(-1000_00)
+    const reloaded = await repo.load()
+    expect(reloaded.counts).toHaveLength(1)
+  })
+
+  it('recordCount with a matched count records a snapshot but no movement', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 1000: 5 } } })
+
+    await useAppStore.getState().recordCount({ countedNotes: { 1000: 5 } })
+
+    const data = useAppStore.getState().data!
+    expect(data.counts).toHaveLength(1)
+    expect(data.counts[0].difference).toBe(0)
+    expect(data.cashMovements).toHaveLength(0)
+  })
+})
+
 describe('appStore udhari', () => {
   it('addPerson appends a person and returns its id', async () => {
     const repo = new InMemoryRepository(seedData())
