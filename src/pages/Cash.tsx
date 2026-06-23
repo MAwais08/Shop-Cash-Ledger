@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAppStore, selectTotalCash, selectBigTotal, selectSmallTotal } from '../store/appStore'
 import { formatPKR } from '../domain/money'
 import { isBigValue } from '../domain/denominations'
@@ -14,6 +15,10 @@ export default function Cash() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Cash &amp; Notes</h1>
+
+      <Link to="/count" className="block rounded-xl bg-emerald-600 py-3 text-center font-semibold text-white">
+        Count &amp; Verify
+      </Link>
 
       <section className="rounded-2xl bg-emerald-600 p-4 text-white">
         <div className="text-sm opacity-90">Total Cash</div>
