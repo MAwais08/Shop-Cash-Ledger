@@ -15,6 +15,7 @@ function baseData(): AppData {
     udharEntries: [],
     expenses: [],
     counts: [],
+    adjustments: [],
   }
 }
 

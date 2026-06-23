@@ -48,4 +48,14 @@ describe('normalizeAppData', () => {
     const n = normalizeAppData(old)
     expect(n.counts).toEqual([])
   })
+
+  it('back-fills adjustments for old data', () => {
+    const old = {
+      settings: { shopName: 'X', pin: '1234', denominations: [], expenseCategories: [] },
+      wallets: [],
+      drawer: {},
+    } as unknown as Parameters<typeof normalizeAppData>[0]
+    const n = normalizeAppData(old)
+    expect(n.adjustments).toEqual([])
+  })
 })

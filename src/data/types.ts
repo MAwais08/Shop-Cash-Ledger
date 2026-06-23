@@ -5,6 +5,7 @@ import type { Transaction, CashMovement } from '../domain/transaction'
 import type { Expense } from '../domain/expense'
 import type { Person, UdharEntry } from '../domain/udhar'
 import type { Count } from '../domain/count'
+import type { Adjustment } from '../domain/adjustment'
 
 export interface Settings {
   shopName: string
@@ -23,4 +24,5 @@ export interface AppData {
   udharEntries: UdharEntry[]
   expenses: Expense[]
   counts: Count[]
+  adjustments: Adjustment[]
 }
