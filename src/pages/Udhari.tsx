@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../store/appStore'
 import { formatPKR } from '../domain/money'
 import { personBalance, udharTotals } from '../domain/udhar'
 
 export default function Udhari() {
+  const navigate = useNavigate()
   const data = useAppStore((s) => s.data)
   const addPerson = useAppStore((s) => s.addPerson)
 
@@ -26,7 +27,8 @@ export default function Udhari() {
     if (!name.trim() || saving) return
     setSaving(true)
     try {
-      await addPerson(name.trim(), phone.trim() || undefined)
+      const id = await addPerson(name.trim(), phone.trim() || undefined)
+      if (id) navigate(`/udhari/${id}`)
       setName('')
       setPhone('')
     } finally {

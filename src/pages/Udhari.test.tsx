@@ -21,4 +21,15 @@ describe('Udhari list page', () => {
     })
     expect(screen.getByText('Ali')).toBeInTheDocument()
   })
+
+  it('shows a balance indicator for each person in the list', async () => {
+    await useAppStore.getState().addPerson('Ali', undefined)
+    render(<MemoryRouter><Udhari /></MemoryRouter>)
+    await waitFor(() => {
+      expect(screen.getByText('Ali')).toBeInTheDocument()
+    })
+    // Balance starts at zero — formatPKR(0) renders "Rs 0"
+    const balanceEls = screen.getAllByText(/Rs\s*0/i)
+    expect(balanceEls.length).toBeGreaterThan(0)
+  })
 })

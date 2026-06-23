@@ -26,6 +26,11 @@ function renderAt(id: string) {
 }
 
 describe('PersonDetail page', () => {
+  it('renders the person name in the page header', () => {
+    renderAt(personId)
+    expect(screen.getByRole('heading', { name: /Ali/i })).toBeInTheDocument()
+  })
+
   it('records a cash udhar given and reduces the drawer', async () => {
     renderAt(personId)
     fireEvent.change(screen.getByLabelText(/amount/i), { target: { value: '2000' } })
