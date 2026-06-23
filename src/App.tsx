@@ -7,6 +7,7 @@ import NewTransaction from './pages/NewTransaction'
 import Transactions from './pages/Transactions'
 import Cash from './pages/Cash'
 import Settings from './pages/Settings'
+import Kharcha from './pages/Kharcha'
 
 export default function App() {
   const authed = useAppStore((s) => s.authed)
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="transactions" element={<Transactions />} />
         <Route path="cash" element={<Cash />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="kharcha" element={<Kharcha />} />
       </Route>
     </Routes>
   )
