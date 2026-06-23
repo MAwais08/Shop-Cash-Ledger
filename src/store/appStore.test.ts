@@ -127,6 +127,9 @@ describe('appStore expenses', () => {
     expect(data.expenses).toHaveLength(1)
     expect(data.expenses[0].id).toBeTruthy()
     expect(data.drawer[100]).toBe(7)
+    expect(data.cashMovements).toHaveLength(1)
+    expect(data.cashMovements[0].sourceType).toBe('kharcha')
+    expect(data.cashMovements[0].delta).toBe(-300_00)
     expect((await repo.load()).expenses).toHaveLength(1)
   })
 
@@ -159,6 +162,7 @@ describe('appStore expenses', () => {
     await useAppStore.getState().deleteExpense(id)
     expect(useAppStore.getState().data!.expenses).toHaveLength(0)
     expect(useAppStore.getState().data!.drawer[100]).toBe(10)
+    expect((await repo.load()).expenses).toHaveLength(0)
   })
 })
 
@@ -184,6 +188,9 @@ describe('appStore udhari', () => {
     const data = useAppStore.getState().data!
     expect(data.udharEntries).toHaveLength(1)
     expect(data.drawer[1000]).toBe(3)
+    expect(data.cashMovements).toHaveLength(1)
+    expect(data.cashMovements[0].sourceType).toBe('udhar')
+    expect(data.cashMovements[0].delta).toBe(-2000_00)
   })
 
   it('deleteUdhar reverses the entry', async () => {
@@ -197,5 +204,18 @@ describe('appStore udhari', () => {
     await useAppStore.getState().deleteUdhar(entryId)
     expect(useAppStore.getState().data!.udharEntries).toHaveLength(0)
     expect(useAppStore.getState().data!.drawer[1000]).toBe(5)
+  })
+
+  it('updatePerson changes name and persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+
+    const id = await useAppStore.getState().addPerson('Ali')
+    await useAppStore.getState().updatePerson(id, { name: 'Ahmed' })
+
+    const person = useAppStore.getState().data!.persons.find((p) => p.id === id)
+    expect(person?.name).toBe('Ahmed')
+    expect((await repo.load()).persons.find((p) => p.id === id)?.name).toBe('Ahmed')
   })
 })
