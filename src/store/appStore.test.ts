@@ -107,3 +107,57 @@ describe('appStore transactions', () => {
     expect((await repo.load()).transactions).toHaveLength(0)
   })
 })
+
+describe('appStore expenses', () => {
+  it('addExpense (cash) reduces the drawer, logs a movement, persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 100: 10 } } })
+
+    await useAppStore.getState().addExpense({
+      category: 'Bijli',
+      amount: 300_00,
+      payment: 'cash',
+      walletId: null,
+      notesOut: { 100: 3 },
+    })
+
+    const data = useAppStore.getState().data!
+    expect(data.expenses).toHaveLength(1)
+    expect(data.expenses[0].id).toBeTruthy()
+    expect(data.drawer[100]).toBe(7)
+    expect((await repo.load()).expenses).toHaveLength(1)
+  })
+
+  it('addExpense (wallet) reduces wallet balance, no CashMovement added', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+
+    await useAppStore.getState().addExpense({
+      category: 'Rent',
+      amount: 5000_00,
+      payment: 'wallet',
+      walletId: 'easypaisa',
+      notesOut: {},
+    })
+
+    const data = useAppStore.getState().data!
+    expect(data.expenses).toHaveLength(1)
+    expect(data.wallets.find((w) => w.id === 'easypaisa')!.balance).toBe(-5000_00)
+    expect(data.cashMovements).toHaveLength(0)
+  })
+
+  it('deleteExpense reverses and persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 100: 10 } } })
+    await useAppStore.getState().addExpense({ category: 'Bijli', amount: 100_00, payment: 'cash', walletId: null, notesOut: { 100: 1 } })
+    const id = useAppStore.getState().data!.expenses[0].id
+    await useAppStore.getState().deleteExpense(id)
+    expect(useAppStore.getState().data!.expenses).toHaveLength(0)
+    expect(useAppStore.getState().data!.drawer[100]).toBe(10)
+  })
+})

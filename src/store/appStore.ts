@@ -6,6 +6,8 @@ import type { Paisa } from '../domain/money'
 import { totalCash, bigTotal, smallTotal } from '../domain/cash'
 import { applyTransaction, deleteTransaction as deleteTxnDomain } from '../domain/transaction'
 import type { TransactionInput } from '../domain/transaction'
+import { applyExpense, deleteExpense as deleteExpenseDomain } from '../domain/expense'
+import type { ExpenseInput } from '../domain/expense'
 
 interface AppState {
   repo: Repository | null
@@ -19,6 +21,8 @@ interface AppState {
   removeWallet: (id: string) => Promise<void>
   addTransaction: (input: Omit<TransactionInput, 'id' | 'createdAt'>) => Promise<void>
   deleteTransaction: (id: string) => Promise<void>
+  addExpense: (input: Omit<ExpenseInput, 'id' | 'createdAt'>) => Promise<void>
+  deleteExpense: (id: string) => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -86,6 +90,23 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { repo, data } = get()
     if (!repo || !data) return
     const next = deleteTxnDomain(data, id)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async addExpense(input) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const full: ExpenseInput = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
+    const next = applyExpense(data, full)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async deleteExpense(id) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const next = deleteExpenseDomain(data, id)
     await repo.save(next)
     set({ data: next })
   },
