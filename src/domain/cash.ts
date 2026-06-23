@@ -48,3 +48,10 @@ export function emptyDrawer(denoms: Denomination[]): DrawerCounts {
   for (const d of denoms) drawer[d.value] = 0
   return drawer
 }
+
+/** Flip the sign of every count in a note map. */
+export function negateNotes(notes: Record<number, number>): Record<number, number> {
+  const out: Record<number, number> = {}
+  for (const [value, count] of Object.entries(notes)) out[Number(value)] = -count
+  return out
+}

@@ -13,3 +13,6 @@ export function applyWalletDelta(w: Wallet, deltaPaisa: Paisa): Wallet {
 export function profit(commissionPaisa: Paisa, discountPaisa: Paisa): Paisa {
   return commissionPaisa - discountPaisa
 }
+
+/** How a kharcha/udhar settles: physical drawer cash, or a digital wallet. */
+export type PaymentMethod = 'cash' | 'wallet'

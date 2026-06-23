@@ -7,6 +7,7 @@ import {
   smallTotal,
   applyNoteDelta,
   emptyDrawer,
+  negateNotes,
 } from './cash'
 
 const sample: DrawerCounts = { 5000: 2, 1000: 3, 100: 5, 10: 4 }
@@ -51,5 +52,14 @@ describe('cash drawer math', () => {
     expect(drawer[5000]).toBe(0)
     expect(drawer[1]).toBe(0)
     expect(totalCash(drawer)).toBe(0)
+  })
+})
+
+describe('negateNotes', () => {
+  it('flips the sign of every count', () => {
+    expect(negateNotes({ 5000: 1, 100: 2 })).toEqual({ 5000: -1, 100: -2 })
+  })
+  it('returns an empty map unchanged', () => {
+    expect(negateNotes({})).toEqual({})
   })
 })

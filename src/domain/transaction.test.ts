@@ -6,11 +6,14 @@ import { applyTransaction, deleteTransaction, mergeNoteDelta, type TransactionIn
 
 function baseData(): AppData {
   return {
-    settings: { shopName: 'T', pin: '1234', denominations: DEFAULT_DENOMINATIONS.map((d) => ({ ...d })) },
+    settings: { shopName: 'T', pin: '1234', denominations: DEFAULT_DENOMINATIONS.map((d) => ({ ...d })), expenseCategories: [] },
     wallets: [{ id: 'jazzcash', name: 'JazzCash', balance: 100000_00 }],
     drawer: emptyDrawer(DEFAULT_DENOMINATIONS),
     transactions: [],
     cashMovements: [],
+    persons: [],
+    udharEntries: [],
+    expenses: [],
   }
 }
 
