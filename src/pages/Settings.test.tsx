@@ -37,4 +37,19 @@ describe('Settings', () => {
       expect(useAppStore.getState().data!.settings.expenseCategories).toContain('Internet')
     })
   })
+
+  it('removes an expense category', async () => {
+    render(<Settings />)
+    const removeButtons = screen.getAllByRole('button', { name: /remove/i })
+    // Find the Remove button for 'Bijli'
+    const bijliRemoveButton = removeButtons.find((btn) => {
+      const li = btn.closest('li')
+      return li?.textContent.includes('Bijli')
+    })
+    expect(bijliRemoveButton).toBeDefined()
+    await userEvent.click(bijliRemoveButton!)
+    await waitFor(() => {
+      expect(useAppStore.getState().data!.settings.expenseCategories).not.toContain('Bijli')
+    })
+  })
 })
