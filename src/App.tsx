@@ -8,6 +8,8 @@ import Transactions from './pages/Transactions'
 import Cash from './pages/Cash'
 import Settings from './pages/Settings'
 import Kharcha from './pages/Kharcha'
+import Udhari from './pages/Udhari'
+import PersonDetail from './pages/PersonDetail'
 
 export default function App() {
   const authed = useAppStore((s) => s.authed)
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="cash" element={<Cash />} />
         <Route path="settings" element={<Settings />} />
         <Route path="kharcha" element={<Kharcha />} />
+        <Route path="udhari" element={<Udhari />} />
+        <Route path="udhari/:personId" element={<PersonDetail />} />
       </Route>
     </Routes>
   )
