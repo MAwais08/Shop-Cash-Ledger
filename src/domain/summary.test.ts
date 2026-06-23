@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import type { Transaction } from './transaction'
 import {
   summarize, isSameDay, todaysTransactions, searchTransactions, walletStats,
+  summarizeExpenses, todaysExpenses, totalWorth,
 } from './summary'
+import type { Expense } from './expense'
 
 function tx(p: Partial<Transaction>): Transaction {
   return {
@@ -71,5 +73,32 @@ describe('walletStats', () => {
     expect(s.received).toBe(2000_00)
     expect(s.commission).toBe(50_00)
     expect(s.discount).toBe(10_00)
+  })
+})
+
+function exp(partial: Partial<Expense>): Expense {
+  return { id: 'e', category: 'Bijli', amount: 100_00, payment: 'cash', walletId: null, createdAt: '2026-06-23T10:00:00.000Z', ...partial }
+}
+
+describe('summarizeExpenses', () => {
+  it('totals and groups by category', () => {
+    const s = summarizeExpenses([exp({ amount: 100_00, category: 'Bijli' }), exp({ amount: 50_00, category: 'Chai / Khana' }), exp({ amount: 25_00, category: 'Bijli' })])
+    expect(s.total).toBe(175_00)
+    expect(s.byCategory['Bijli']).toBe(125_00)
+    expect(s.byCategory['Chai / Khana']).toBe(50_00)
+  })
+})
+
+describe('todaysExpenses', () => {
+  it('keeps only same-day expenses', () => {
+    const ref = new Date('2026-06-23T12:00:00.000Z')
+    const list = [exp({ createdAt: '2026-06-23T08:00:00.000Z' }), exp({ createdAt: '2026-06-22T08:00:00.000Z' })]
+    expect(todaysExpenses(list, ref)).toHaveLength(1)
+  })
+})
+
+describe('totalWorth', () => {
+  it('is cash + wallets + receivable - payable', () => {
+    expect(totalWorth(1000_00, 5000_00, 2000_00, 300_00)).toBe(7700_00)
   })
 })

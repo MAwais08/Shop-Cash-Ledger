@@ -1,5 +1,6 @@
 import type { Paisa } from './money'
 import type { Transaction } from './transaction'
+import type { Expense } from './expense'
 
 export interface DaySummary {
   count: number
@@ -59,4 +60,28 @@ export function walletStats(
     s.discount += t.discount
   }
   return s
+}
+
+export interface ExpenseSummary {
+  total: Paisa
+  byCategory: Record<string, Paisa>
+}
+
+export function summarizeExpenses(expenses: Expense[]): ExpenseSummary {
+  const byCategory: Record<string, Paisa> = {}
+  let total = 0
+  for (const e of expenses) {
+    total += e.amount
+    byCategory[e.category] = (byCategory[e.category] ?? 0) + e.amount
+  }
+  return { total, byCategory }
+}
+
+export function todaysExpenses(expenses: Expense[], ref: Date): Expense[] {
+  return expenses.filter((e) => isSameDay(e.createdAt, ref))
+}
+
+/** Net worth: drawer cash + all wallet balances + money owed to the shop − money the shop owes. */
+export function totalWorth(cash: Paisa, walletBalance: Paisa, receivable: Paisa, payable: Paisa): Paisa {
+  return cash + walletBalance + receivable - payable
 }
