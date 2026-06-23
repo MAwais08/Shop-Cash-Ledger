@@ -23,7 +23,7 @@ export interface Transaction {
 
 export interface CashMovement {
   id: string
-  sourceType: 'transaction' | 'adjustment' | 'kharcha' | 'udhar'
+  sourceType: 'transaction' | 'adjustment' | 'kharcha' | 'udhar' | 'count'
   sourceId: string
   delta: Paisa
   notes: Record<number, number>

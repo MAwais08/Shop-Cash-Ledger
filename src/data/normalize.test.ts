@@ -38,4 +38,14 @@ describe('normalizeAppData', () => {
     expect(n.expenses).toEqual([])
     expect(n.settings.expenseCategories.length).toBeGreaterThan(0)
   })
+
+  it('back-fills counts for old data', () => {
+    const old = {
+      settings: { shopName: 'X', pin: '1234', denominations: [], expenseCategories: [] },
+      wallets: [],
+      drawer: {},
+    } as unknown as Parameters<typeof normalizeAppData>[0]
+    const n = normalizeAppData(old)
+    expect(n.counts).toEqual([])
+  })
 })

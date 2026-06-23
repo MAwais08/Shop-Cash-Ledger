@@ -14,6 +14,7 @@ function baseData(): AppData {
     persons: [{ id: 'p1', name: 'Ali' }],
     udharEntries: [],
     expenses: [],
+    counts: [],
   }
 }
 

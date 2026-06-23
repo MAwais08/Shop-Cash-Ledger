@@ -8,6 +8,7 @@ import {
   applyNoteDelta,
   emptyDrawer,
   negateNotes,
+  diffNotes,
 } from './cash'
 
 const sample: DrawerCounts = { 5000: 2, 1000: 3, 100: 5, 10: 4 }
@@ -61,5 +62,17 @@ describe('negateNotes', () => {
   })
   it('returns an empty map unchanged', () => {
     expect(negateNotes({})).toEqual({})
+  })
+})
+
+describe('diffNotes', () => {
+  it('returns the signed per-denomination delta to reach target from current', () => {
+    expect(diffNotes({ 100: 5, 50: 2 }, { 100: 3, 50: 2 })).toEqual({ 100: 2 })
+  })
+  it('includes negative deltas and values present only on one side', () => {
+    expect(diffNotes({ 100: 1, 500: 0 }, { 100: 3, 50: 1 })).toEqual({ 100: -2, 50: -1 })
+  })
+  it('returns an empty map when target equals current', () => {
+    expect(diffNotes({ 100: 3 }, { 100: 3 })).toEqual({})
   })
 })

@@ -14,5 +14,6 @@ export function normalizeAppData(data: AppData): AppData {
     persons: data.persons ?? [],
     udharEntries: data.udharEntries ?? [],
     expenses: data.expenses ?? [],
+    counts: data.counts ?? [],
   }
 }

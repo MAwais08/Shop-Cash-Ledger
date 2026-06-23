@@ -55,3 +55,20 @@ export function negateNotes(notes: Record<number, number>): Record<number, numbe
   for (const [value, count] of Object.entries(notes)) out[Number(value)] = -count
   return out
 }
+
+/** Per-denomination signed delta to turn `current` into `target`. Omits zero deltas. */
+export function diffNotes(
+  target: Record<number, number>,
+  current: Record<number, number>,
+): Record<number, number> {
+  const out: Record<number, number> = {}
+  const values = new Set<number>([
+    ...Object.keys(target).map(Number),
+    ...Object.keys(current).map(Number),
+  ])
+  for (const v of values) {
+    const delta = (target[v] ?? 0) - (current[v] ?? 0)
+    if (delta !== 0) out[v] = delta
+  }
+  return out
+}

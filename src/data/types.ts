@@ -4,6 +4,7 @@ import type { DrawerCounts } from '../domain/cash'
 import type { Transaction, CashMovement } from '../domain/transaction'
 import type { Expense } from '../domain/expense'
 import type { Person, UdharEntry } from '../domain/udhar'
+import type { Count } from '../domain/count'
 
 export interface Settings {
   shopName: string
@@ -21,4 +22,5 @@ export interface AppData {
   persons: Person[]
   udharEntries: UdharEntry[]
   expenses: Expense[]
+  counts: Count[]
 }

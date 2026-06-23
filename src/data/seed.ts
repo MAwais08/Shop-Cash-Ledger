@@ -22,5 +22,6 @@ export function seedData(): AppData {
     persons: [],
     udharEntries: [],
     expenses: [],
+    counts: [],
   }
 }
