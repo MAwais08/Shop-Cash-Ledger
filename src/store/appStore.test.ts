@@ -254,3 +254,57 @@ describe('appStore udhari', () => {
     expect((await repo.load()).persons.find((p) => p.id === id)?.name).toBe('Ahmed')
   })
 })
+
+describe('appStore adjustments', () => {
+  it('addAdjustment (cash) raises drawer, logs adjustment movement, persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 1000: 5 } } })
+
+    await useAppStore.getState().addAdjustment({ cashNotes: { 1000: 2 } })
+
+    const data = useAppStore.getState().data!
+    expect(data.adjustments).toHaveLength(1)
+    expect(data.adjustments[0].id).toBeTruthy()
+    expect(data.drawer[1000]).toBe(7)
+    expect(data.cashMovements).toHaveLength(1)
+    expect(data.cashMovements[0].sourceType).toBe('adjustment')
+    expect(data.cashMovements[0].delta).toBe(2000_00)
+    const reloaded = await repo.load()
+    expect(reloaded.adjustments).toHaveLength(1)
+  })
+
+  it('addAdjustment (wallet) raises wallet balance, no CashMovement, persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+
+    await useAppStore.getState().addAdjustment({ walletId: 'easypaisa', walletDelta: 5000_00 })
+
+    const data = useAppStore.getState().data!
+    expect(data.adjustments).toHaveLength(1)
+    expect(data.wallets.find((w) => w.id === 'easypaisa')!.balance).toBe(5000_00)
+    expect(data.cashMovements).toHaveLength(0)
+    const reloaded = await repo.load()
+    expect(reloaded.adjustments).toHaveLength(1)
+  })
+
+  it('deleteAdjustment reverses effects and persists', async () => {
+    const repo = new InMemoryRepository(seedData())
+    useAppStore.setState({ data: null, authed: false, repo: null })
+    await useAppStore.getState().init(repo)
+    useAppStore.setState({ data: { ...useAppStore.getState().data!, drawer: { 1000: 5 } } })
+
+    await useAppStore.getState().addAdjustment({ cashNotes: { 1000: 2 } })
+    const id = useAppStore.getState().data!.adjustments[0].id
+    await useAppStore.getState().deleteAdjustment(id)
+
+    const data = useAppStore.getState().data!
+    expect(data.adjustments).toHaveLength(0)
+    expect(data.drawer[1000]).toBe(5)
+    expect(data.cashMovements).toHaveLength(0)
+    const reloaded = await repo.load()
+    expect(reloaded.adjustments).toHaveLength(0)
+  })
+})

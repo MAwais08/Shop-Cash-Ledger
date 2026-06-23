@@ -12,6 +12,8 @@ import { applyUdhar, deleteUdhar as deleteUdharDomain } from '../domain/udhar'
 import type { UdharInput, Person } from '../domain/udhar'
 import { applyCount } from '../domain/count'
 import type { CountInput } from '../domain/count'
+import { applyAdjustment, deleteAdjustment as deleteAdjustmentDomain } from '../domain/adjustment'
+import type { AdjustmentInput } from '../domain/adjustment'
 
 interface AppState {
   repo: Repository | null
@@ -32,6 +34,8 @@ interface AppState {
   addUdhar: (input: Omit<UdharInput, 'id' | 'createdAt'>) => Promise<void>
   deleteUdhar: (id: string) => Promise<void>
   recordCount: (input: Omit<CountInput, 'id' | 'createdAt'>) => Promise<void>
+  addAdjustment: (input: Omit<AdjustmentInput, 'id' | 'createdAt'>) => Promise<void>
+  deleteAdjustment: (id: string) => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -165,6 +169,27 @@ export const useAppStore = create<AppState>((set, get) => ({
       createdAt: new Date().toISOString(),
     }
     const next = applyCount(data, full)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async addAdjustment(input) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const full: AdjustmentInput = {
+      ...input,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    }
+    const next = applyAdjustment(data, full)
+    await repo.save(next)
+    set({ data: next })
+  },
+
+  async deleteAdjustment(id) {
+    const { repo, data } = get()
+    if (!repo || !data) return
+    const next = deleteAdjustmentDomain(data, id)
     await repo.save(next)
     set({ data: next })
   },
