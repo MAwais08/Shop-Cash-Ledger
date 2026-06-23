@@ -20,6 +20,10 @@ export default function Cash() {
         Count &amp; Verify
       </Link>
 
+      <Link to="/adjustment" className="block rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
+        Add / Remove Money
+      </Link>
+
       <section className="rounded-2xl bg-emerald-600 p-4 text-white">
         <div className="text-sm opacity-90">Total Cash</div>
         <div className="text-3xl font-extrabold">{formatPKR(total)}</div>

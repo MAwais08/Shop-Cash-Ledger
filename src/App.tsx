@@ -11,6 +11,7 @@ import Kharcha from './pages/Kharcha'
 import Udhari from './pages/Udhari'
 import PersonDetail from './pages/PersonDetail'
 import CountDrawer from './pages/CountDrawer'
+import Adjustment from './pages/Adjustment'
 
 export default function App() {
   const authed = useAppStore((s) => s.authed)
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="udhari" element={<Udhari />} />
         <Route path="udhari/:personId" element={<PersonDetail />} />
         <Route path="count" element={<CountDrawer />} />
+        <Route path="adjustment" element={<Adjustment />} />
       </Route>
     </Routes>
   )

@@ -87,6 +87,9 @@ export default function Dashboard() {
         <Link to="/count" className="rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
           Count Drawer
         </Link>
+        <Link to="/adjustment" className="rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
+          Add / Remove Money
+        </Link>
         <Link to="/cash" className="rounded-xl bg-slate-200 py-3 text-center font-semibold">
           Cash &amp; Notes
         </Link>
