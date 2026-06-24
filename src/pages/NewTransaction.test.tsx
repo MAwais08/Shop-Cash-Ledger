@@ -92,6 +92,35 @@ describe('NewTransaction — guided form', () => {
     expect(after.cashMovements[0].delta).toBe(1020_00)
   })
 
+  it('submits a valid Easyload and stores commission=0, correct deltas', async () => {
+    const { getByRole } = renderPage()
+
+    // Easyload is the default type — click it anyway to be explicit
+    fireEvent.click(screen.getByRole('button', { name: /^easyload$/i }))
+
+    // Select first real wallet
+    const walletSelect = screen.getByLabelText(/^wallet$/i) as HTMLSelectElement
+    fireEvent.change(walletSelect, { target: { value: walletSelect.options[1].value } })
+
+    // Amount: 500 rupees
+    const amountInput = screen.getAllByRole('spinbutton')[0]
+    fireEvent.change(amountInput, { target: { value: '500' } })
+
+    // Cash received: one Rs 500 note
+    const receivedSection = screen.getByText('Notes Received').closest('.rounded-xl') as HTMLElement
+    fireEvent.click(within(receivedSection).getByRole('button', { name: 'add Rs 500' }))
+
+    fireEvent.click(getByRole('button', { name: /confirm|submit/i }))
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'))
+
+    const after = useAppStore.getState().data!
+    expect(after.transactions[0].type).toBe('easyload')
+    expect(after.transactions[0].commission).toBe(0)
+    expect(after.transactions[0].walletDelta).toBe(-500_00)
+    expect(after.transactions[0].cashDelta).toBe(500_00)
+    expect(after.cashMovements[0].delta).toBe(500_00)
+  })
+
   it('Easyload hides the commission controls', () => {
     renderPage()
     fireEvent.click(screen.getByRole('button', { name: /^easyload$/i }))
