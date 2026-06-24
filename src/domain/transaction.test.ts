@@ -201,4 +201,15 @@ describe('deleteTransaction', () => {
     const after = applyTransaction(baseData(), depositCashInput)
     expect(deleteTransaction(after, 'nope').transactions).toHaveLength(1)
   })
+
+  it('throws NEGATIVE_NOTES if the notes to reverse are no longer in the drawer', () => {
+    const after = applyTransaction(baseData(), depositCashInput)
+    // Spend the 1000-note that was just added, leaving the drawer without it
+    const spent = applyTransaction(after, {
+      id: 't9', createdAt: '2026-06-24T10:00:00.000Z', type: 'other',
+      walletId: null, walletDelta: 0, amount: 1000_00, commission: 0, commissionMode: 'cash',
+      notesIn: {}, notesOut: { 1000: 1 },
+    })
+    expect(() => deleteTransaction(spent, 't1')).toThrow('NEGATIVE_NOTES')
+  })
 })
