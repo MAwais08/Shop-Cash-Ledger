@@ -5,7 +5,7 @@ import { formatPKR } from '../domain/money'
 import type { TransactionType } from '../domain/transaction'
 
 const TYPE_LABEL: Record<TransactionType, string> = {
-  easyload: 'Easyload', send: 'Send', receive: 'Receive', package: 'Package', other: 'Other',
+  easyload: 'Easyload', deposit: 'Deposit', withdraw: 'Withdraw', package: 'Package', other: 'Other',
 }
 
 export default function Transactions() {
@@ -56,7 +56,7 @@ export default function Transactions() {
                 {t.customerName || '—'} {t.customerPhone ? `· ${t.customerPhone}` : ''}
               </div>
               <div className="text-xs text-slate-400">
-                Cash {t.cashDelta >= 0 ? '+' : ''}{formatPKR(t.cashDelta)} · Profit {formatPKR(t.commission - t.discount)}
+                Cash {t.cashDelta >= 0 ? '+' : ''}{formatPKR(t.cashDelta)} · Profit {formatPKR(t.commission - (t.discount ?? 0))}
               </div>
             </div>
             <button

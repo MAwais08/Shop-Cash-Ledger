@@ -12,12 +12,12 @@ beforeEach(async () => {
   await useAppStore.getState().init(new InMemoryRepository(seedData()))
   useAppStore.setState({ authed: true })
   await useAppStore.getState().addTransaction({
-    type: 'send', walletId: 'jazzcash', walletDelta: -5000_00, amount: 5000_00,
-    commission: 50_00, discount: 0, notesIn: { 5000: 1 }, notesOut: {}, customerName: 'Ali Khan',
+    type: 'deposit', walletId: 'jazzcash', amount: 5000_00,
+    commission: 50_00, commissionMode: 'cash', notesIn: { 5000: 1, 50: 1 }, notesOut: {}, customerName: 'Ali Khan',
   })
   await useAppStore.getState().addTransaction({
-    type: 'receive', walletId: 'easypaisa', walletDelta: 2000_00, amount: 2000_00,
-    commission: 20_00, discount: 0, notesIn: { 1000: 2 }, notesOut: {}, customerName: 'Bilal',
+    type: 'deposit', walletId: 'easypaisa', amount: 2000_00,
+    commission: 20_00, commissionMode: 'cash', notesIn: { 2000: 1, 20: 1 }, notesOut: {}, customerName: 'Bilal',
   })
 })
 

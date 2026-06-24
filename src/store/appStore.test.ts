@@ -68,13 +68,12 @@ describe('appStore transactions', () => {
     await useAppStore.getState().init(repo)
 
     await useAppStore.getState().addTransaction({
-      type: 'send',
+      type: 'deposit',
       walletId: 'jazzcash',
-      walletDelta: -5000_00,
-      amount: 5000_00,
-      commission: 50_00,
-      discount: 0,
-      notesIn: { 5000: 1, 50: 1 },
+      amount: 1000_00,
+      commission: 20_00,
+      commissionMode: 'cash',
+      notesIn: { 1000: 1, 20: 1 },
       notesOut: {},
       customerName: 'Ali',
     })
@@ -82,7 +81,7 @@ describe('appStore transactions', () => {
     const data = useAppStore.getState().data!
     expect(data.transactions).toHaveLength(1)
     expect(data.transactions[0].id).toBeTruthy()
-    expect(data.wallets.find((w) => w.id === 'jazzcash')!.balance).toBe(-5000_00)
+    expect(data.wallets.find((w) => w.id === 'jazzcash')!.balance).toBe(-1000_00)
     const reloaded = await repo.load()
     expect(reloaded.transactions).toHaveLength(1)
   })
@@ -97,7 +96,7 @@ describe('appStore transactions', () => {
       walletDelta: 0,
       amount: 1000_00,
       commission: 0,
-      discount: 0,
+      commissionMode: 'cash',
       notesIn: { 1000: 1 },
       notesOut: {},
     })
