@@ -9,7 +9,7 @@ import type { Expense } from './expense'
 function tx(p: Partial<Transaction>): Transaction {
   return {
     id: 'x', type: 'deposit', walletId: 'jazzcash', walletDelta: 0, amount: 0,
-    commission: 0, discount: 0, cashDelta: 0, createdAt: '2026-06-22T10:00:00.000Z', ...p,
+    commission: 0, commissionMode: 'cash', discount: 0, cashDelta: 0, createdAt: '2026-06-22T10:00:00.000Z', ...p,
   }
 }
 
