@@ -4,7 +4,9 @@ import { totalCash, applyNoteDelta } from './cash'
 import { applyWalletDelta } from './wallet'
 import type { AppData } from '../data/types'
 
-export type TransactionType = 'easyload' | 'send' | 'receive' | 'package' | 'other'
+export type TransactionType = 'deposit' | 'withdraw' | 'easyload' | 'package' | 'other'
+
+export type CommissionMode = 'cash' | 'wallet'
 
 export interface Transaction {
   id: string
@@ -13,8 +15,10 @@ export interface Transaction {
   walletDelta: Paisa
   amount: Paisa
   commission: Paisa
-  discount: Paisa
+  commissionMode: CommissionMode
   cashDelta: Paisa
+  /** Legacy only; omitted on new transactions. */
+  discount?: Paisa
   customerName?: string
   customerPhone?: string
   note?: string
@@ -36,15 +40,46 @@ export interface TransactionInput {
   createdAt: string
   type: TransactionType
   walletId: string | null
-  walletDelta: Paisa
   amount: Paisa
   commission: Paisa
-  discount: Paisa
+  commissionMode: CommissionMode
   notesIn: Record<number, number>
   notesOut: Record<number, number>
+  /** Manual signed wallet delta — used ONLY by type 'other'. Ignored for guided types. */
+  walletDelta?: Paisa
   customerName?: string
   customerPhone?: string
   note?: string
+}
+
+/**
+ * Derive the signed wallet and cash movements for a guided transaction.
+ * `amount` is the transfer amount; `commission` is the shop's fee. Signs are
+ * from the shop's view. Pure/deterministic. For deposit/withdraw, total worth
+ * rises by exactly `commission`; easyload/package net to zero. `other` is not
+ * derived here — the caller supplies its deltas.
+ */
+export function deriveMovements(
+  type: TransactionType,
+  amount: Paisa,
+  commission: Paisa,
+  commissionMode: CommissionMode,
+): { walletDelta: Paisa; cashDelta: Paisa } {
+  switch (type) {
+    case 'deposit':
+      return commissionMode === 'cash'
+        ? { cashDelta: amount + commission, walletDelta: -amount }
+        : { cashDelta: amount, walletDelta: -(amount - commission) }
+    case 'withdraw':
+      return commissionMode === 'cash'
+        ? { cashDelta: -(amount - commission), walletDelta: amount }
+        : { cashDelta: -amount, walletDelta: amount + commission }
+    case 'easyload':
+    case 'package':
+      return { cashDelta: amount, walletDelta: -amount }
+    default:
+      return { cashDelta: 0, walletDelta: 0 }
+  }
 }
 
 /** Combine received notes (+) and given-change notes (-) into one signed delta. */
@@ -102,29 +137,51 @@ export function deleteTransaction(data: AppData, transactionId: string): AppData
 /**
  * Apply a transaction to the app data, returning new data with the wallet,
  * drawer, transactions and cashMovements updated. Pure and immutable.
+ *
+ * Guided types (deposit/withdraw/easyload/package) derive their wallet and cash
+ * deltas from `deriveMovements`; the entered notes MUST net to the derived cash
+ * target or this throws Error('CASH_MISMATCH'). easyload/package force
+ * commission to 0. Type 'other' is the manual escape hatch: it uses the
+ * supplied `walletDelta` and notes with no derivation or reconciliation.
  * Throws Error('NEGATIVE_NOTES') if change given exceeds the drawer.
  */
 export function applyTransaction(data: AppData, input: TransactionInput): AppData {
-  const noteDelta = mergeNoteDelta(input.notesIn, input.notesOut)
-  const cashDelta: Paisa = totalCash(input.notesIn) - totalCash(input.notesOut)
+  const isGuided = input.type !== 'other'
+  const commission: Paisa =
+    input.type === 'easyload' || input.type === 'package' ? 0 : input.commission
 
+  const actual: Paisa = totalCash(input.notesIn) - totalCash(input.notesOut)
+
+  let walletDelta: Paisa
+  let cashDelta: Paisa
+  if (isGuided) {
+    const derived = deriveMovements(input.type, input.amount, commission, input.commissionMode)
+    walletDelta = derived.walletDelta
+    cashDelta = derived.cashDelta
+    if (actual !== cashDelta) throw new Error('CASH_MISMATCH')
+  } else {
+    walletDelta = input.walletDelta ?? 0
+    cashDelta = actual
+  }
+
+  const noteDelta = mergeNoteDelta(input.notesIn, input.notesOut)
   const drawer: DrawerCounts = applyNoteDelta(data.drawer, noteDelta)
 
   const wallets =
-    input.walletId === null || input.walletDelta === 0
+    input.walletId === null || walletDelta === 0
       ? data.wallets
       : data.wallets.map((w) =>
-          w.id === input.walletId ? applyWalletDelta(w, input.walletDelta) : w,
+          w.id === input.walletId ? applyWalletDelta(w, walletDelta) : w,
         )
 
   const transaction: Transaction = {
     id: input.id,
     type: input.type,
     walletId: input.walletId,
-    walletDelta: input.walletDelta,
+    walletDelta,
     amount: input.amount,
-    commission: input.commission,
-    discount: input.discount,
+    commission,
+    commissionMode: input.commissionMode,
     cashDelta,
     customerName: input.customerName,
     customerPhone: input.customerPhone,
@@ -140,6 +197,7 @@ export function applyTransaction(data: AppData, input: TransactionInput): AppDat
       sourceId: input.id,
       delta: cashDelta,
       notes: noteDelta,
+      note: input.note,
       createdAt: input.createdAt,
     })
   }
