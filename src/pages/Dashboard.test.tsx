@@ -40,8 +40,8 @@ describe('Dashboard', () => {
 
   it('shows today summary from real transactions', async () => {
     await useAppStore.getState().addTransaction({
-      type: 'send', walletId: 'easypaisa', walletDelta: -1000_00, amount: 1000_00,
-      commission: 30_00, discount: 0, notesIn: { 1000: 1 }, notesOut: {},
+      type: 'deposit', walletId: 'easypaisa', walletDelta: -1000_00, amount: 1000_00,
+      commission: 30_00, commissionMode: 'cash', notesIn: { 1000: 1, 20: 1, 10: 1 }, notesOut: {},
     })
     renderDash()
     expect(screen.getByText('Rs 30')).toBeInTheDocument() // today profit

@@ -8,24 +8,34 @@ import type { Expense } from './expense'
 
 function tx(p: Partial<Transaction>): Transaction {
   return {
-    id: 'x', type: 'send', walletId: 'jazzcash', walletDelta: 0, amount: 0,
+    id: 'x', type: 'deposit', walletId: 'jazzcash', walletDelta: 0, amount: 0,
     commission: 0, discount: 0, cashDelta: 0, createdAt: '2026-06-22T10:00:00.000Z', ...p,
   }
 }
 
 describe('summarize', () => {
-  it('totals counts, sent, received, commission, discount and profit', () => {
+  it('totals counts, deposited, withdrawn, commission, discount and profit', () => {
     const s = summarize([
-      tx({ type: 'send', amount: 5000_00, commission: 50_00, discount: 0 }),
-      tx({ type: 'receive', amount: 2000_00, commission: 20_00, discount: 5_00 }),
+      tx({ type: 'deposit', amount: 5000_00, commission: 50_00 }),
+      tx({ type: 'withdraw', amount: 2000_00, commission: 20_00, discount: 5_00 }),
       tx({ type: 'easyload', amount: 100_00, commission: 3_00, discount: 0 }),
     ])
     expect(s.count).toBe(3)
-    expect(s.sent).toBe(5000_00)
-    expect(s.received).toBe(2000_00)
+    expect(s.deposited).toBe(5000_00)
+    expect(s.withdrawn).toBe(2000_00)
     expect(s.commission).toBe(73_00)
     expect(s.discount).toBe(5_00)
     expect(s.profit).toBe(68_00) // 73 - 5
+  })
+
+  it('still counts legacy-remapped rows that lack a discount field', () => {
+    const s = summarize([
+      tx({ type: 'deposit', amount: 1000_00, commission: 10_00 }),
+      tx({ type: 'withdraw', amount: 500_00, commission: 5_00 }),
+    ])
+    expect(s.deposited).toBe(1000_00)
+    expect(s.withdrawn).toBe(500_00)
+    expect(s.profit).toBe(15_00)
   })
 })
 
@@ -62,15 +72,15 @@ describe('searchTransactions', () => {
 })
 
 describe('walletStats', () => {
-  it('sums sent/received/commission/discount for one wallet', () => {
+  it('sums deposited/withdrawn/commission/discount for one wallet', () => {
     const list = [
-      tx({ walletId: 'jazzcash', type: 'send', amount: 5000_00, commission: 50_00 }),
-      tx({ walletId: 'jazzcash', type: 'receive', amount: 2000_00, discount: 10_00 }),
-      tx({ walletId: 'easypaisa', type: 'send', amount: 999_00, commission: 9_00 }),
+      tx({ walletId: 'jazzcash', type: 'deposit', amount: 5000_00, commission: 50_00 }),
+      tx({ walletId: 'jazzcash', type: 'withdraw', amount: 2000_00, discount: 10_00 }),
+      tx({ walletId: 'easypaisa', type: 'deposit', amount: 999_00, commission: 9_00 }),
     ]
     const s = walletStats(list, 'jazzcash')
-    expect(s.sent).toBe(5000_00)
-    expect(s.received).toBe(2000_00)
+    expect(s.deposited).toBe(5000_00)
+    expect(s.withdrawn).toBe(2000_00)
     expect(s.commission).toBe(50_00)
     expect(s.discount).toBe(10_00)
   })

@@ -4,21 +4,21 @@ import type { Expense } from './expense'
 
 export interface DaySummary {
   count: number
-  sent: Paisa
-  received: Paisa
+  deposited: Paisa
+  withdrawn: Paisa
   commission: Paisa
   discount: Paisa
   profit: Paisa
 }
 
 export function summarize(transactions: Transaction[]): DaySummary {
-  const s: DaySummary = { count: 0, sent: 0, received: 0, commission: 0, discount: 0, profit: 0 }
+  const s: DaySummary = { count: 0, deposited: 0, withdrawn: 0, commission: 0, discount: 0, profit: 0 }
   for (const t of transactions) {
     s.count += 1
-    if (t.type === 'send') s.sent += t.amount
-    if (t.type === 'receive') s.received += t.amount
+    if (t.type === 'deposit') s.deposited += t.amount
+    if (t.type === 'withdraw') s.withdrawn += t.amount
     s.commission += t.commission
-    s.discount += t.discount
+    s.discount += t.discount ?? 0
   }
   s.profit = s.commission - s.discount
   return s
@@ -50,14 +50,14 @@ export function searchTransactions(transactions: Transaction[], query: string): 
 export function walletStats(
   transactions: Transaction[],
   walletId: string,
-): { sent: Paisa; received: Paisa; commission: Paisa; discount: Paisa } {
-  const s = { sent: 0, received: 0, commission: 0, discount: 0 }
+): { deposited: Paisa; withdrawn: Paisa; commission: Paisa; discount: Paisa } {
+  const s = { deposited: 0, withdrawn: 0, commission: 0, discount: 0 }
   for (const t of transactions) {
     if (t.walletId !== walletId) continue
-    if (t.type === 'send') s.sent += t.amount
-    if (t.type === 'receive') s.received += t.amount
+    if (t.type === 'deposit') s.deposited += t.amount
+    if (t.type === 'withdraw') s.withdrawn += t.amount
     s.commission += t.commission
-    s.discount += t.discount
+    s.discount += t.discount ?? 0
   }
   return s
 }

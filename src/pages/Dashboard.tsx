@@ -69,8 +69,8 @@ export default function Dashboard() {
           <StatCard label="Transactions" value={String(today.count)} />
           <StatCard label="Profit" value={formatPKR(today.profit)} accent="text-emerald-600" />
           <StatCard label="Kharcha" value={formatPKR(todayKharcha)} accent="text-red-600" />
-          <StatCard label="Sent" value={formatPKR(today.sent)} />
-          <StatCard label="Received" value={formatPKR(today.received)} />
+          <StatCard label="Deposited" value={formatPKR(today.deposited)} />
+          <StatCard label="Withdrawn" value={formatPKR(today.withdrawn)} />
         </div>
       </section>
 
