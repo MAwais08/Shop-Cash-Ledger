@@ -41,11 +41,8 @@ export default function NewTransaction() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const isGuided = type !== 'other'
-  const showCommission = type === 'deposit' || type === 'withdraw'
-
   const amountPaisa = toPaisa(amount)
-  const commissionPaisa = showCommission ? toPaisa(commission) : 0
+  const commissionPaisa = toPaisa(commission)
 
   const actualNet = useMemo(() => totalCash(notesIn) - totalCash(notesOut), [notesIn, notesOut])
 
@@ -54,17 +51,21 @@ export default function NewTransaction() {
     [type, amountPaisa, commissionPaisa, commissionMode],
   )
 
+  if (!data) return <div className="p-8">Loading…</div>
+
+  const isGuided = type !== 'other'
+  const showCommission = type === 'deposit' || type === 'withdraw'
+
   // For 'other': manual signed wallet delta from the direction toggle.
   const otherWalletDelta = dir === 'out' ? -amountPaisa : dir === 'in' ? amountPaisa : 0
   const useOtherWallet = dir !== 'none' && !!walletId
 
-  const wallet = data?.wallets.find((w) => w.id === walletId)
+  const wallet = data.wallets.find((w) => w.id === walletId)
   const matches = actualNet === derived.cashDelta
   const isValid = isGuided
     ? amountPaisa > 0 && matches
     : amountPaisa > 0
 
-  if (!data) return <div className="p-8">Loading…</div>
   const denominations = data.settings.denominations
 
   function pickType(t: TransactionType) {
