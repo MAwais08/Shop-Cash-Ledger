@@ -8,9 +8,15 @@ import {
 } from '../store/appStore'
 import { formatPKR } from '../domain/money'
 import { todayLabel } from '../lib/formatDate'
-import { summarize, todaysTransactions, summarizeExpenses, todaysExpenses, totalWorth } from '../domain/summary'
+import {
+  summarize,
+  todaysTransactions,
+  summarizeExpenses,
+  todaysExpenses,
+  totalWorth,
+} from '../domain/summary'
 import { udharTotals } from '../domain/udhar'
-import StatCard from '../components/StatCard'
+import { Plus, Receipt, Users, Calculator, Scale, Banknote, ArrowLeftRight } from 'lucide-react'
 
 export default function Dashboard() {
   const shopName = useAppStore((s) => s.data?.settings.shopName ?? 'PCO Shop')
@@ -22,9 +28,15 @@ export default function Dashboard() {
   const total = useAppStore(selectTotalCash)
   const big = useAppStore(selectBigTotal)
   const small = useAppStore(selectSmallTotal)
-  const today = useMemo(() => summarize(todaysTransactions(transactions, new Date())), [transactions])
+  const today = useMemo(
+    () => summarize(todaysTransactions(transactions, new Date())),
+    [transactions],
+  )
   const walletBalance = useMemo(() => wallets.reduce((sum, w) => sum + w.balance, 0), [wallets])
-  const todayKharcha = useMemo(() => summarizeExpenses(todaysExpenses(expenses, new Date())).total, [expenses])
+  const todayExpenseTotal = useMemo(
+    () => summarizeExpenses(todaysExpenses(expenses, new Date())).total,
+    [expenses],
+  )
   const udhar = useMemo(() => udharTotals(udharEntries, persons), [udharEntries, persons])
   const worth = totalWorth(total, walletBalance, udhar.receivable, udhar.payable)
 
@@ -35,67 +47,126 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500">{todayLabel()}</p>
       </header>
 
+      {/* Cash hero card */}
       <section className="rounded-2xl bg-emerald-600 p-4 text-white">
-        <div className="text-sm opacity-90">Total Cash</div>
+        <div className="text-sm opacity-90">Total Cash in Drawer</div>
         <div className="text-3xl font-extrabold">{formatPKR(total)}</div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-3 gap-2">
           <div className="rounded-lg bg-white/15 p-2">
-            <div className="text-xs opacity-90">Bare Note (Big)</div>
+            <div className="text-xs opacity-90">Large Notes</div>
             <div className="font-bold">{formatPKR(big)}</div>
           </div>
           <div className="rounded-lg bg-white/15 p-2">
-            <div className="text-xs opacity-90">Chote Note (Small)</div>
+            <div className="text-xs opacity-90">Small Notes</div>
             <div className="font-bold">{formatPKR(small)}</div>
           </div>
-        </div>
-        <div className="mt-3 rounded-lg bg-white/15 p-2">
-          <div className="text-xs opacity-90">Total Worth</div>
-          <div className="font-bold">{formatPKR(worth)}</div>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-600">Wallets</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {wallets.map((w) => (
-            <StatCard key={w.id} label={w.name} value={formatPKR(w.balance)} />
-          ))}
+          <div className="rounded-lg bg-white/15 p-2">
+            <div className="text-xs opacity-90">Total Worth</div>
+            <div className="font-bold">{formatPKR(worth)}</div>
+          </div>
         </div>
       </section>
 
-      <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-600">Today</h2>
-        <div className="grid grid-cols-3 gap-2">
-          <StatCard label="Transactions" value={String(today.count)} />
-          <StatCard label="Profit" value={formatPKR(today.profit)} accent="text-emerald-600" />
-          <StatCard label="Kharcha" value={formatPKR(todayKharcha)} accent="text-red-600" />
-          <StatCard label="Deposited" value={formatPKR(today.deposited)} />
-          <StatCard label="Withdrawn" value={formatPKR(today.withdrawn)} />
-        </div>
-      </section>
+      {/* Wallets + Today side-by-side on wider screens */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Wallets
+          </h2>
+          <div className="space-y-2">
+            {wallets.map((w) => (
+              <div
+                key={w.id}
+                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
+              >
+                <span className="text-sm text-slate-700">{w.name}</span>
+                <span className="text-sm font-semibold text-slate-900">{formatPKR(w.balance)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <section className="grid grid-cols-2 gap-2">
-        <Link to="/new" className="col-span-2 rounded-xl bg-emerald-600 py-3 text-center font-semibold text-white">
-          + New Transaction
-        </Link>
-        <Link to="/kharcha" className="rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
-          Kharcha
-        </Link>
-        <Link to="/udhari" className="rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
-          Udhar
-        </Link>
-        <Link to="/count" className="rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
-          Count Drawer
-        </Link>
-        <Link to="/adjustment" className="rounded-xl bg-slate-900 py-3 text-center font-semibold text-white">
-          Add / Remove Money
-        </Link>
-        <Link to="/cash" className="rounded-xl bg-slate-200 py-3 text-center font-semibold">
-          Cash &amp; Notes
-        </Link>
-        <Link to="/transactions" className="rounded-xl bg-slate-200 py-3 text-center font-semibold">
-          Transactions
-        </Link>
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Today
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg bg-emerald-50 p-3 text-center">
+              <div className="text-xs text-slate-500">Profit</div>
+              <div className="text-base font-bold text-emerald-600">{formatPKR(today.profit)}</div>
+            </div>
+            <div className="rounded-lg bg-red-50 p-3 text-center">
+              <div className="text-xs text-slate-500">Expenses</div>
+              <div className="text-base font-bold text-red-600">{formatPKR(todayExpenseTotal)}</div>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-3 text-center">
+              <div className="text-xs text-slate-500">Deposited</div>
+              <div className="text-base font-bold text-slate-900">{formatPKR(today.deposited)}</div>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-3 text-center">
+              <div className="text-xs text-slate-500">Withdrawn</div>
+              <div className="text-base font-bold text-slate-900">{formatPKR(today.withdrawn)}</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Quick actions */}
+      <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Quick Actions
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/new"
+            className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+          >
+            <Plus className="h-4 w-4" />
+            New Transaction
+          </Link>
+          <Link
+            to="/kharcha"
+            className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            <Receipt className="h-4 w-4" />
+            Add Expense
+          </Link>
+          <Link
+            to="/udhari"
+            className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            <Users className="h-4 w-4" />
+            Credit Ledger
+          </Link>
+          <Link
+            to="/count"
+            className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            <Calculator className="h-4 w-4" />
+            Count Cash
+          </Link>
+          <Link
+            to="/adjustment"
+            className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            <Scale className="h-4 w-4" />
+            Capital Adjustment
+          </Link>
+          <Link
+            to="/cash"
+            className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            <Banknote className="h-4 w-4" />
+            Cash & Notes
+          </Link>
+          <Link
+            to="/transactions"
+            className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+            Transactions
+          </Link>
+        </div>
       </section>
     </div>
   )
