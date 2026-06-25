@@ -29,11 +29,11 @@ export default function Cash() {
         <div className="text-3xl font-extrabold">{formatPKR(total)}</div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-white/15 p-2">
-            <div className="text-xs opacity-90">Bare Note (Big)</div>
+            <div className="text-xs opacity-90">Large Notes</div>
             <div className="font-bold">{formatPKR(big)}</div>
           </div>
           <div className="rounded-lg bg-white/15 p-2">
-            <div className="text-xs opacity-90">Chote Note (Small)</div>
+            <div className="text-xs opacity-90">Small Notes</div>
             <div className="font-bold">{formatPKR(small)}</div>
           </div>
         </div>
