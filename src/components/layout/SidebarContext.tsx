@@ -20,6 +20,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSidebar() {
   const ctx = useContext(SidebarContext)
   if (!ctx) throw new Error('useSidebar must be used inside SidebarProvider')
