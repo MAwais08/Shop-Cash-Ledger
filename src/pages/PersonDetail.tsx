@@ -215,7 +215,7 @@ export default function PersonDetail() {
               className="flex items-center justify-between rounded-lg border bg-white px-3 py-2 text-sm"
             >
               <span>
-                {e.type === 'given' ? 'Diya' : 'Wapsi'}{' '}
+                {e.type === 'given' ? 'Given' : 'Repayment'}{' '}
                 <span className="text-slate-400">· {e.payment}</span>
               </span>
               <span

@@ -27,7 +27,7 @@ describe('Kharcha page', () => {
     fireEvent.click(screen.getByLabelText('add Rs 100'))
     fireEvent.click(screen.getByLabelText('add Rs 100'))
     fireEvent.click(screen.getByLabelText('add Rs 100'))
-    fireEvent.click(screen.getByRole('button', { name: /save kharcha/i }))
+    fireEvent.click(screen.getByRole('button', { name: /save expense/i }))
     await waitFor(() => {
       expect(useAppStore.getState().data!.expenses).toHaveLength(1)
     })
@@ -38,7 +38,7 @@ describe('Kharcha page', () => {
     renderPage()
     fireEvent.change(screen.getByLabelText(/amount/i), { target: { value: '5000' } })
     for (let i = 0; i < 11; i++) fireEvent.click(screen.getByLabelText('add Rs 100'))
-    fireEvent.click(screen.getByRole('button', { name: /save kharcha/i }))
+    fireEvent.click(screen.getByRole('button', { name: /save expense/i }))
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument()
     })

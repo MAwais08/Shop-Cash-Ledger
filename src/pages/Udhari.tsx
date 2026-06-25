@@ -42,11 +42,11 @@ export default function Udhari() {
 
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-xl border bg-white p-3">
-          <div className="text-xs text-slate-500">Receivable (lena)</div>
+          <div className="text-xs text-slate-500">Receivable</div>
           <div className="text-lg font-bold text-emerald-600">{formatPKR(totals.receivable)}</div>
         </div>
         <div className="rounded-xl border bg-white p-3">
-          <div className="text-xs text-slate-500">Payable (dena)</div>
+          <div className="text-xs text-slate-500">Payable</div>
           <div className="text-lg font-bold text-red-600">{formatPKR(totals.payable)}</div>
         </div>
       </div>

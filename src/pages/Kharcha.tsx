@@ -55,7 +55,7 @@ export default function Kharcha() {
       setError(
         err instanceof Error && err.message === 'NEGATIVE_NOTES'
           ? 'Cash paid exceeds the drawer. Adjust the notes and try again.'
-          : 'Could not save the kharcha. Please try again.',
+          : 'Could not save the expense. Please try again.',
       )
     } finally {
       setLoading(false)
@@ -65,7 +65,7 @@ export default function Kharcha() {
   return (
     <div className="space-y-4">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Kharcha</h1>
+        <h1 className="text-xl font-bold">Expenses</h1>
         <div className="text-right text-sm">
           <div className="text-slate-500">Today</div>
           <div className="font-bold text-red-600">{formatPKR(todayTotal)}</div>
@@ -185,7 +185,7 @@ export default function Kharcha() {
               isValid && !loading ? 'bg-emerald-600 hover:bg-emerald-700' : 'cursor-not-allowed bg-slate-400'
             }`}
           >
-            {loading ? 'Saving…' : 'Save Kharcha'}
+            {loading ? 'Saving…' : 'Save Expense'}
           </button>
         </div>
       </form>
@@ -206,7 +206,7 @@ export default function Kharcha() {
             </li>
           ))}
           {expenses.length === 0 && (
-            <li className="text-sm text-slate-400">No kharcha yet.</li>
+            <li className="text-sm text-slate-400">No expenses yet.</li>
           )}
         </ul>
       </section>
