@@ -6,7 +6,7 @@ import AppHeader from './layout/AppHeader'
 export default function AppLayout() {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-slate-50">
+      <div className="flex min-h-screen w-full bg-stone-50">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <AppHeader />

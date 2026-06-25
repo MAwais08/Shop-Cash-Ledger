@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { @apply bg-slate-50 text-slate-900; margin: 0; }
+body { @apply bg-stone-50 text-slate-900 font-sans; margin: 0; }
