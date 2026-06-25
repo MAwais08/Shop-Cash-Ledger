@@ -100,7 +100,7 @@ export default function PersonDetail() {
                 type === t ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
               }`}
             >
-              {t === 'given' ? 'Udhar diya (out)' : 'Wapsi li (in)'}
+              {t === 'given' ? 'Credit Given' : 'Repayment'}
             </button>
           ))}
         </div>

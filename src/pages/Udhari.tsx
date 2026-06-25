@@ -38,7 +38,7 @@ export default function Udhari() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Udhari</h1>
+      <h1 className="text-xl font-bold">Credit Ledger</h1>
 
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-xl border bg-white p-3">
