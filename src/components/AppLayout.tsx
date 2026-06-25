@@ -1,34 +1,22 @@
-import { NavLink, Outlet } from 'react-router-dom'
-
-const tabs = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/transactions', label: 'Txns', end: false },
-  { to: '/cash', label: 'Cash', end: false },
-  { to: '/settings', label: 'Settings', end: false },
-]
+import { Outlet } from 'react-router-dom'
+import { SidebarProvider } from './layout/SidebarContext'
+import AppSidebar from './layout/AppSidebar'
+import AppHeader from './layout/AppHeader'
 
 export default function AppLayout() {
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col">
-      <main className="flex-1 p-4 pb-24" aria-label="Content">
-        <Outlet />
-      </main>
-      <nav className="fixed inset-x-0 bottom-0 mx-auto flex max-w-3xl border-t bg-white" aria-label="Main">
-        {tabs.map((t) => (
-          <NavLink
-            key={t.to}
-            to={t.to}
-            end={t.end}
-            className={({ isActive }) =>
-              `flex-1 py-3 text-center text-sm ${
-                isActive ? 'font-semibold text-emerald-600' : 'text-slate-500'
-              }`
-            }
-          >
-            {t.label}
-          </NavLink>
-        ))}
-      </nav>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-slate-50">
+        <AppSidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AppHeader />
+          <main className="flex-1 overflow-auto p-4 md:p-6" aria-label="Content">
+            <div className="mx-auto max-w-4xl">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   )
 }
